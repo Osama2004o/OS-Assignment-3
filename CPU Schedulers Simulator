@@ -1,0 +1,110 @@
+package org.example;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class Process {
+    private String name;
+    private int arrivalTime;
+    private int burstTime;
+    private int priority;
+    private int waitingTime;
+    private int turnaroundTime;
+
+    public Process(String name, int arrivalTime, int burstTime, int priority) {
+        this.name = name;
+        this.arrivalTime = arrivalTime;
+        this.burstTime = burstTime;
+        this.priority = priority;
+    }
+
+    public String getName() { return name; }
+    public int getArrivalTime() { return arrivalTime; }
+    public int getBurstTime() { return burstTime; }
+    public int getPriority() { return priority; }
+    public int getWaitingTime() { return waitingTime; }
+    public int getTurnaroundTime() { return turnaroundTime; }
+
+    public void setWaitingTime(int waitingTime) { this.waitingTime = waitingTime; }
+    public void setTurnaroundTime(int turnaroundTime) { this.turnaroundTime = turnaroundTime; }
+}
+
+class ProcessInputManager {
+    private ArrayList<Process> processList;
+    private int quantum;
+    private int contextSwitching;
+
+    public ProcessInputManager() {
+        processList = new ArrayList<>();
+    }
+
+    public void readProcessInput() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of processes: ");
+        int numberOfProcesses = scanner.nextInt();
+
+        System.out.print("Enter Round Robin Time Quantum: ");
+        quantum = scanner.nextInt();
+
+        System.out.print("Enter Context Switching Time: ");
+        contextSwitching = scanner.nextInt();
+
+        for (int i = 0; i < numberOfProcesses; i++) {
+            System.out.printf("Enter details for Process %d:%n", i + 1);
+            System.out.print("Name: ");
+            String name = scanner.next();
+
+            int arrivalTime = getValidInt(scanner, "Arrival Time (non-negative): ");
+            int burstTime = getValidInt(scanner, "Burst Time (non-negative): ");
+            int priority = getValidInt(scanner, "Priority (1-10): ");
+
+            processList.add(new Process(name, arrivalTime, burstTime, priority));
+        }
+    }
+
+    private int getValidInt(Scanner scanner, String prompt) {
+        int value;
+        do {
+            System.out.print(prompt);
+            value = scanner.nextInt();
+            if (value < 0) {
+                System.out.println("Value must be non-negative. Please try again.");
+            }
+        } while (value < 0);
+        return value;
+    }
+
+    public ArrayList<Process> getProcesses() {
+        return processList;
+    }
+
+    public int getQuantum() { return quantum; }
+    public int getContextSwitching() { return contextSwitching; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        ProcessInputManager inputManager = new ProcessInputManager();
+        inputManager.readProcessInput();
+        ArrayList<Process> processes = inputManager.getProcesses();
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nChoose a CPU Scheduling Algorithm:");
+        System.out.println("1. Non-Preemptive Priority Scheduling");
+        System.out.println("2. Non-Preemptive Shortest Job First (SJF)");
+        System.out.println("3. Shortest Remaining Time First (SRTF)");
+        System.out.println("4. FCAI Scheduling");
+        System.out.print("Enter your choice (1-4): ");
+
+        int choice = scanner.nextInt();
+        switch (choice) {
+            case 1:
+                PriorityScheduling.runPriorityScheduling(processes);
+                break;
+            // Add cases for other scheduling algorithms
+            default:
+                System.out.println("Invalid choice! Please select a valid option.");
+                break;
+        }
+    }
+}
