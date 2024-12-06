@@ -82,6 +82,64 @@ class ProcessInputManager {
     public int getContextSwitching() { return contextSwitching; }
 }
 
+class SJF {
+    public static void runSJF(ArrayList<Process> processes) {
+        processes.sort(Comparator.comparingInt(Process::getArrivalTime));
+
+        int currentTime = 0;
+        int totalWaitingTime = 0;
+        int totalTurnaroundTime = 0;
+        int completed = 0;
+
+        System.out.printf("%-10s %-15s %-10s %-15s %-15s%n",
+                "Process", "Arrival Time", "Burst Time", "Waiting Time", "Turnaround Time");
+        System.out.println("-----------------------------------------------------------------------");
+
+        while (completed < processes.size()) {
+            ArrayList<Process> availableProcesses = new ArrayList<>();
+            for (Process process : processes) {
+                if (process.getArrivalTime() <= currentTime && process.getTurnaroundTime() == 0) {
+                    availableProcesses.add(process);
+                }
+            }
+
+            if (availableProcesses.isEmpty()) {
+                currentTime++;
+                continue;
+            }
+
+            availableProcesses.sort(Comparator.comparingInt(Process::getBurstTime));
+            Process currentProcess = availableProcesses.get(0);
+
+            int waitingTime = currentTime - currentProcess.getArrivalTime();
+            if (waitingTime < 0) waitingTime = 0;
+            currentProcess.setWaitingTime(waitingTime);
+            totalWaitingTime += waitingTime;
+
+            int turnaroundTime = waitingTime + currentProcess.getBurstTime();
+            currentProcess.setTurnaroundTime(turnaroundTime);
+            totalTurnaroundTime += turnaroundTime;
+
+            currentTime += currentProcess.getBurstTime();
+            completed++;
+
+            System.out.printf("%-10s %-15d %-10d %-15d %-15d%n",
+                    currentProcess.getName(),
+                    currentProcess.getArrivalTime(),
+                    currentProcess.getBurstTime(),
+                    currentProcess.getWaitingTime(),
+                    currentProcess.getTurnaroundTime());
+        }
+
+        System.out.println("-----------------------------------------------------------------------");
+
+        double avgWaitingTime = (double) totalWaitingTime / processes.size();
+        double avgTurnaroundTime = (double) totalTurnaroundTime / processes.size();
+        System.out.printf("Average Waiting Time = %.1f%n", avgWaitingTime);
+        System.out.printf("Average Turnaround Time = %.1f%n", avgTurnaroundTime);
+    }
+}
+
 public class Main {
     public static void main(String[] args) {
         ProcessInputManager inputManager = new ProcessInputManager();
@@ -102,6 +160,9 @@ public class Main {
                 PriorityScheduling.runPriorityScheduling(processes);
                 break;
             // Add cases for other scheduling algorithms
+            case 2:
+                SJF.runSJF(processes);
+                break;
             default:
                 System.out.println("Invalid choice! Please select a valid option.");
                 break;
